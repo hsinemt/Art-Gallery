@@ -1,0 +1,228 @@
+/* Portfolio horizontal scroll styles
+   Makes the gallery images scroll horizontally (right/left) using pure CSS.
+   Scoped to the Portfolio page structure to avoid affecting other components.
+*/
+
+/* 1) Turn the existing carousel container into a horizontal scroller */
+.portfolio-single #gallery .owl-carousel {
+  display: flex;               /* lay out items in a row */
+  flex-wrap: nowrap;           /* single row */
+  overflow-x: auto;            /* enable horizontal scroll */
+  overflow-y: hidden;          /* no vertical scroll inside */
+  scroll-snap-type: x mandatory; /* snap to each item */
+  -webkit-overflow-scrolling: touch; /* smooth momentum scrolling on iOS */
+  gap: 10px;                   /* space between items (works alongside theme gutters) */
+  padding: 10px 12px 14px;     /* inner padding to avoid edge clipping */
+  background-color: #F7F7F7;   /* light background consistent with light mode */
+}
+
+/* 2) Each item as a snapping card */
+.portfolio-single #gallery .album-single-item {
+  position: relative;
+  flex: 0 0 auto;              /* prevent items from shrinking; width defined below */
+  scroll-snap-align: start;    /* snap item start into view */
+  border-radius: 6px;          /* soften corners */
+  overflow: hidden;            /* clip image corners */
+  background: #eaeaea;         /* fallback before image loads */
+  /* Default size (desktop): about 25% viewport width for 4 visible items */
+  inline-size: 25vw;           /* logical width for horizontal flow */
+  block-size: 48vh;            /* logical height; makes a nice tall strip */
+  min-block-size: 280px;       /* ensure decent height on short viewports */
+  max-inline-size: 520px;      /* prevent overly wide items on large screens */
+}
+
+/* Ensure internal cover image stretches fully */
+.portfolio-single #gallery .album-single-item .full-cover.bg-image {
+  position: absolute;
+  inset: 0;                    /* top/right/bottom/left: 0 */
+  background-size: cover;      /* image covers the tile */
+  background-position: 50% 50%;
+}
+
+/* Maintain overlays/infos stacking properly */
+.portfolio-single #gallery .album-single-item .asi-cover,
+.portfolio-single #gallery .album-single-item .asi-link,
+.portfolio-single #gallery .album-single-item .asi-info,
+.portfolio-single #gallery .album-single-item .favorite-btn {
+  position: relative;
+  z-index: 2;
+}
+
+/* 3) Responsive sizing: show larger tiles on small screens for easier swipe */
+@media (max-width: 1200px) {
+  .portfolio-single #gallery .album-single-item {
+    inline-size: 33.333vw;    /* ~3 items visible */
+  }
+}
+@media (max-width: 992px) {
+  .portfolio-single #gallery .album-single-item {
+    inline-size: 45vw;        /* ~2 items visible */
+  }
+}
+@media (max-width: 768px) {
+  .portfolio-single #gallery .album-single-item {
+    inline-size: 70vw;        /* ~1.4 items visible */
+    block-size: 46vh;         /* slightly shorter on small devices */
+  }
+}
+@media (max-width: 480px) {
+  .portfolio-single #gallery .album-single-item {
+    inline-size: 85vw;        /* almost full width per card */
+    block-size: 44vh;
+  }
+}
+
+/* 4) Optional: subtle custom scrollbar for webkit */
+.portfolio-single #gallery .owl-carousel::-webkit-scrollbar {
+  height: 8px;
+}
+.portfolio-single #gallery .owl-carousel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.portfolio-single #gallery .owl-carousel::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+
+/* 5) Neutralize potential owl-related defaults if theme provided them */
+.portfolio-single #gallery .owl-carousel .owl-item { width: auto !important; }
+.portfolio-single #gallery .owl-carousel .owl-stage { width: auto !important; display: contents !important; }
+.portfolio-single #gallery .owl-carousel .owl-stage-outer { overflow: visible !important; }
+
+/* 6) Ensure container takes available height when used in column layout */
+.portfolio-single .col-right .f-height,
+.portfolio-single #gallery.f-height {
+  height: auto;
+}
+
+/* Full-bleed wrapper to escape centered #root constraints */
+.portfolio-fullbleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  overflow-x: hidden; /* avoid horizontal page scroll due to 100vw rounding */
+}
+/* Remove inner paddings so content is truly edge-to-edge */
+.portfolio-fullbleed .content-wrap {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Make the portfolio section span full width even when nested */
+.portfolio-fullbleed .portfolio-single .container,
+.portfolio-fullbleed .portfolio-single .container-fluid {
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Keep the page header section edge-to-edge */
+.portfolio-fullbleed #page-header-secion .page-header-image,
+.portfolio-fullbleed #page-header-secion .page-header-cover,
+.portfolio-fullbleed #page-header-secion .page-header-content {
+  width: 100%;
+}
+
+/* Existing horizontal scroll styles (from previous delivery) */
+/* Portfolio horizontal scroll styles
+   Makes the gallery images scroll horizontally (right/left) using pure CSS.
+   Scoped to the Portfolio page structure to avoid affecting other components.
+*/
+
+/* 1) Turn the existing carousel container into a horizontal scroller */
+.portfolio-single #gallery .owl-carousel {
+  display: flex;               /* lay out items in a row */
+  flex-wrap: nowrap;           /* single row */
+  overflow-x: auto;            /* enable horizontal scroll */
+  overflow-y: hidden;          /* no vertical scroll inside */
+  scroll-snap-type: x mandatory; /* snap to each item */
+  -webkit-overflow-scrolling: touch; /* smooth momentum scrolling on iOS */
+  gap: 10px;                   /* space between items (works alongside theme gutters) */
+  padding: 10px 12px 14px;     /* inner padding to avoid edge clipping */
+  background-color: #F7F7F7;   /* light background consistent with light mode */
+  overscroll-behavior-inline: contain; /* keep wheel/trackpad scroll inside scroller */
+  scroll-behavior: smooth;     /* smooth programmatic scroll */
+}
+
+/* 2) Each item as a snapping card */
+.portfolio-single #gallery .album-single-item {
+  position: relative;
+  flex: 0 0 auto;              /* prevent items from shrinking; width defined below */
+  scroll-snap-align: start;    /* snap item start into view */
+  border-radius: 6px;          /* soften corners */
+  overflow: hidden;            /* clip image corners */
+  background: #eaeaea;         /* fallback before image loads */
+  /* Default size (desktop): about 25% viewport width for 4 visible items */
+  inline-size: 25vw;           /* logical width for horizontal flow */
+  block-size: 48vh;            /* logical height; makes a nice tall strip */
+  min-block-size: 280px;       /* ensure decent height on short viewports */
+  max-inline-size: 520px;      /* prevent overly wide items on large screens */
+}
+
+/* Ensure internal cover image stretches fully */
+.portfolio-single #gallery .album-single-item .full-cover.bg-image {
+  position: absolute;
+  inset: 0;                    /* top/right/bottom/left: 0 */
+  background-size: cover;      /* image covers the tile */
+  background-position: 50% 50%;
+}
+
+/* Maintain overlays/infos stacking properly */
+.portfolio-single #gallery .album-single-item .asi-cover,
+.portfolio-single #gallery .album-single-item .asi-link,
+.portfolio-single #gallery .album-single-item .asi-info,
+.portfolio-single #gallery .album-single-item .favorite-btn {
+  position: relative;
+  z-index: 2;
+}
+
+/* 3) Responsive sizing: show larger tiles on small screens for easier swipe */
+@media (max-width: 1200px) {
+  .portfolio-single #gallery .album-single-item {
+    inline-size: 33.333vw;    /* ~3 items visible */
+  }
+}
+@media (max-width: 992px) {
+  .portfolio-single #gallery .album-single-item {
+    inline-size: 45vw;        /* ~2 items visible */
+  }
+}
+@media (max-width: 768px) {
+  .portfolio-single #gallery .album-single-item {
+    inline-size: 70vw;        /* ~1.4 items visible */
+    block-size: 46vh;         /* slightly shorter on small devices */
+  }
+}
+@media (max-width: 480px) {
+  .portfolio-single #gallery .album-single-item {
+    inline-size: 85vw;        /* almost full width per card */
+    block-size: 44vh;
+  }
+}
+
+/* 4) Optional: subtle custom scrollbar for webkit */
+.portfolio-single #gallery .owl-carousel::-webkit-scrollbar {
+  height: 8px;
+}
+.portfolio-single #gallery .owl-carousel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.portfolio-single #gallery .owl-carousel::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+
+/* 5) Neutralize potential owl-related defaults if theme provided them */
+.portfolio-single #gallery .owl-carousel .owl-item { width: auto !important; }
+.portfolio-single #gallery .owl-carousel .owl-stage { width: auto !important; display: contents !important; }
+.portfolio-single #gallery .owl-carousel .owl-stage-outer { overflow: visible !important; }
+
+/* 6) Ensure container takes available height when used in column layout */
+.portfolio-single .col-right .f-height,
+.portfolio-single #gallery.f-height {
+  height: auto;
+}
+
+/* 7) Minor alignment tweaks for the left info column so it doesn’t clip */
+.portfolio-single .col-left { padding-left: 15px; padding-right: 15px; }
+.portfolio-single .col-right { padding-left: 0; padding-right: 0; }

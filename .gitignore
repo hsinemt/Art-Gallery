@@ -1,0 +1,110 @@
+# Root Git ignore for ArtGallery project (Django + Frontend)
+
+# --------------------
+# Python / Django
+# --------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.pyo
+
+# Packages
+*.egg-info/
+.eggs/
+
+# Builds
+build/
+dist/
+pip-wheel-metadata/
+
+# Django runtime and local settings
+local_settings.py
+*.sqlite3
+db.sqlite3
+
+# Collected/static and media
+static/
+staticfiles/
+Backend/static/
+Backend/staticfiles/
+media/
+Backend/media/
+
+# Logs
+*.log
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+Backend/artVenv/
+Backend/artVenv/**
+
+# Testing / coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+
+# Type checking / analysis caches
+.mypy_cache/
+.pyre/
+.pytype/
+
+# --------------------
+# Node / Frontend
+# --------------------
+node_modules/
+Frontend/node_modules/
+
+# Build outputs
+.dist/
+dist/
+build/
+Frontend/dist/
+
+# Tool caches
+.cache/
+.tmp/
+.parcel-cache/
+.vite/
+Frontend/.vite/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test coverage (JS)
+.nyc_output/
+coverage/
+
+# --------------------
+# Environment files
+# --------------------
+.env
+.env.*
+!.env.example
+
+# --------------------
+# IDE / Editor
+# --------------------
+.idea/
+.vscode/
+*.code-workspace
+
+# --------------------
+# OS generated files
+# --------------------
+.DS_Store
+Thumbs.db
+
+# --------------------
+# Misc
+# --------------------
+*.swp
+*.swo
