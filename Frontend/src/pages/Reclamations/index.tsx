@@ -1,3 +1,4 @@
+// pages/Reclamations/ReclamationsPage.tsx
 import { useState, useEffect } from 'react';
 import type { Reclamation, User } from '../../types';
 import { reclamationService } from '../../api/reclamation/reclamationService';
@@ -51,7 +52,6 @@ const ReclamationsPage = () => {
         const loadUsers = async () => {
             try {
                 const usersList = await userService.getAllUsers();
-                // Exclure l'admin de la liste (filtre robuste)
                 const filtered = usersList.filter(u => !(u.is_superuser === true || u.is_staff === true || u.username === 'admin'));
                 setUsers(filtered);
             } catch (err) {
@@ -92,13 +92,12 @@ const ReclamationsPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // Map local form shape (cible_id) to API shape (cible)
             const payload: any = {
                 sujet: formData.sujet,
                 contenu: formData.contenu,
             };
             if (formData.sujet === 'user' && formData.cible_id) {
-                payload.cible = formData.cible_id;
+                payload.cible_id = formData.cible_id;
             }
 
             await reclamationService.createReclamation(payload);
@@ -108,7 +107,6 @@ const ReclamationsPage = () => {
         } catch (err: any) {
             if (err?.response?.data) {
                 const errorData = err.response.data;
-                // Format validation errors
                 if (typeof errorData === 'object') {
                     const errorMessages = Object.entries(errorData)
                         .map(([key, value]) => `${key}: ${value}`)
@@ -163,9 +161,7 @@ const ReclamationsPage = () => {
                 contenu: editData.contenu,
             };
             if (editData.sujet === 'user' && editData.cible_id) {
-                payload.cible = editData.cible_id;
-            } else {
-                payload.cible = null;
+                payload.cible_id = editData.cible_id;
             }
             await reclamationService.updateReclamation(editingId, payload);
             setEditingId(null);
@@ -175,7 +171,6 @@ const ReclamationsPage = () => {
         } catch (err: any) {
             if (err?.response?.data) {
                 const errorData = err.response.data;
-                // Format validation errors
                 if (typeof errorData === 'object') {
                     const errorMessages = Object.entries(errorData)
                         .map(([key, value]) => `${key}: ${value}`)
@@ -202,32 +197,6 @@ const ReclamationsPage = () => {
         }
     };
 
-    const getRiskBadge = (emotions: any) => {
-        if (!emotions || !emotions.risk_level) return null;
-        
-        const riskColors: { [key: string]: string } = {
-            'HIGH': 'danger',
-            'MEDIUM': 'warning',
-            'LOW': 'info',
-            'MINIMAL': 'secondary'
-        };
-
-        const riskEmojis: { [key: string]: string } = {
-            'HIGH': '🔴',
-            'MEDIUM': '🟠',
-            'LOW': '🟡',
-            'MINIMAL': '🟢'
-        };
-
-        const risk = emotions.risk_level;
-        return (
-            <span className={`badge badge-${riskColors[risk] || 'secondary'}`}>
-                {riskEmojis[risk]} {risk}
-            </span>
-        );
-    };
-
-    // While auth is resolving show a spinner to avoid rendering null/undefined data
     if (authLoading) {
         return (
             <PageLayout title="Gestion des Réclamations">
@@ -252,7 +221,6 @@ const ReclamationsPage = () => {
 
     return (
         <PageLayout title="Gestion des Réclamations">
-            {/* Formulaire de création */}
             <div className="card mb-4">
                 <div className="card-header">
                     <h4>Nouvelle Réclamation</h4>
@@ -319,7 +287,6 @@ const ReclamationsPage = () => {
                 </div>
             </div>
 
-            {/* Formulaire d'édition inline */}
             {editingId && (
                 <div className="card mb-4 border-warning">
                     <div className="card-header bg-warning text-dark">
@@ -382,7 +349,6 @@ const ReclamationsPage = () => {
                 </div>
             )}
 
-            {/* Onglets pour filtrer les réclamations */}
             <div className="card">
                 <div className="card-header">
                     <ul className="nav nav-tabs card-header-tabs">
@@ -431,14 +397,14 @@ const ReclamationsPage = () => {
                                 <thead className="thead-light">
                                     <tr>
                                         <th>Date</th>
-                                            {isAdmin ? (
-                                                <>
-                                                    <th>Auteur</th>
-                                                    <th>Cible</th>
-                                                </>
-                                            ) : (
-                                                <th>{activeTab === 'received' ? 'De' : 'À'}</th>
-                                            )}
+                                        {isAdmin ? (
+                                            <>
+                                                <th>Auteur</th>
+                                                <th>Cible</th>
+                                            </>
+                                        ) : (
+                                            <th>{activeTab === 'received' ? 'De' : 'À'}</th>
+                                        )}
                                         <th>Sujet</th>
                                         <th>Contenu</th>
                                         {isAdmin && <th>Sentiment</th>}
@@ -453,20 +419,20 @@ const ReclamationsPage = () => {
                                             onClick={() => setSelectedReclamation(reclamation)}
                                         >
                                             <td>{reclamation.date_creation ? new Date(reclamation.date_creation).toLocaleDateString('fr-FR') : '—'}</td>
-                                                {isAdmin ? (
-                                                    <>
-                                                        <td><strong>{reclamation.auteur?.username || '—'}</strong></td>
-                                                        <td><strong>{reclamation.cible?.username || '_'}</strong></td>
-                                                    </>
-                                                ) : (
-                                                    <td>
-                                                        <strong>
-                                                            {activeTab === 'received'
-                                                                ? (reclamation.auteur?.username || '—')
-                                                                : (reclamation.cible?.username || 'Système')}
-                                                        </strong>
-                                                    </td>
-                                                )}
+                                            {isAdmin ? (
+                                                <>
+                                                    <td><strong>{reclamation.auteur?.username || '—'}</strong></td>
+                                                    <td><strong>{reclamation.cible?.username || '—'}</strong></td>
+                                                </>
+                                            ) : (
+                                                <td>
+                                                    <strong>
+                                                        {activeTab === 'received'
+                                                            ? (reclamation.auteur?.username || '—')
+                                                            : (reclamation.cible?.username || '—')}
+                                                    </strong>
+                                                </td>
+                                            )}
                                             <td>
                                                 <span className={`badge badge-${reclamation.sujet === 'system' ? 'primary' : 'info'}`}>
                                                     {reclamation.sujet}
@@ -518,7 +484,6 @@ const ReclamationsPage = () => {
                 </div>
             </div>
 
-            {/* Modal pour les détails de la réclamation */}
             <Modal
                 isOpen={selectedReclamation !== null}
                 onClose={() => setSelectedReclamation(null)}

@@ -38,6 +38,22 @@ class ReclamationSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'sentiment_local', 'emotions_local', 'date_creation', 'auteur']
 
+    def to_representation(self, instance):
+        """
+        Customize output - only admins can see sentiment fields
+        """
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        
+        # If user is not admin, remove sentiment fields
+        if request and hasattr(request, 'user'):
+            user = request.user
+            if not (user.is_staff or user.is_superuser):
+                representation.pop('sentiment_local', None)
+                representation.pop('emotions_local', None)
+        
+        return representation
+
     def validate(self, data):
         # Si le sujet est 'user', la cible est obligatoire
         if data.get('sujet') == 'user' and not data.get('cible'):
@@ -52,11 +68,41 @@ class ReclamationSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # Calcul automatique des sentiments
+        # Calcul automatique des sentiments avec analyse complète
         text = validated_data.get('contenu', '')
         analysis = analyze_feelings(text)
+        
+        # Store sentiment
         validated_data['sentiment_local'] = analysis['sentiment']
-        validated_data['emotions_local'] = analysis['emotions']
+        
+        # Store detailed emotions data
+        emotions_data = {
+            'risk_level': analysis.get('risk_level', 'MINIMAL'),
+            'risk_score': analysis.get('risk_score', 0),
+            'positive_score': analysis.get('positive_score', 0),
+            'negative_score': analysis.get('negative_score', 0),
+            'emotions': []
+        }
+        
+        # Get all detected emotions sorted by intensity
+        if analysis.get('emotions'):
+            sorted_emotions = sorted(
+                analysis['emotions'].items(),
+                key=lambda x: x[1]['intensity'],
+                reverse=True
+            )
+            
+            for emotion, data in sorted_emotions:
+                emotions_data['emotions'].append({
+                    'name': emotion,
+                    'intensity': data['intensity'],
+                    'count': data['count'],
+                    'severity': data.get('severity', 1),
+                    'keywords': data.get('keywords', [])[:5]  # Limit to 5 keywords
+                })
+        
+        validated_data['emotions_local'] = emotions_data
+        
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -64,6 +110,34 @@ class ReclamationSerializer(serializers.ModelSerializer):
         if 'contenu' in validated_data:
             text = validated_data.get('contenu', '')
             analysis = analyze_feelings(text)
+            
             validated_data['sentiment_local'] = analysis['sentiment']
-            validated_data['emotions_local'] = analysis['emotions']
+            
+            # Store detailed emotions data
+            emotions_data = {
+                'risk_level': analysis.get('risk_level', 'MINIMAL'),
+                'risk_score': analysis.get('risk_score', 0),
+                'positive_score': analysis.get('positive_score', 0),
+                'negative_score': analysis.get('negative_score', 0),
+                'emotions': []
+            }
+            
+            if analysis.get('emotions'):
+                sorted_emotions = sorted(
+                    analysis['emotions'].items(),
+                    key=lambda x: x[1]['intensity'],
+                    reverse=True
+                )
+                
+                for emotion, data in sorted_emotions:
+                    emotions_data['emotions'].append({
+                        'name': emotion,
+                        'intensity': data['intensity'],
+                        'count': data['count'],
+                        'severity': data.get('severity', 1),
+                        'keywords': data.get('keywords', [])[:5]
+                    })
+            
+            validated_data['emotions_local'] = emotions_data
+        
         return super().update(instance, validated_data)

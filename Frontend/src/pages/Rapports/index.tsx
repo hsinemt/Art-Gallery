@@ -384,7 +384,7 @@ const RapportsPage = () => {
                                 <h6>Créé par :</h6>
                                 <p>
                                     <strong>{selectedRapport.user.username}</strong>
-                                    {selectedRapport.user.email && ` (${selectedRapport.user.email})`}
+                                    {selectedRapport.user.username && ` (${selectedRapport.user.username})`}
                                 </p>
                             </div>
                         )}
