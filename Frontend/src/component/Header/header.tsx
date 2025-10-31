@@ -1,6 +1,34 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import './header.css';
 
 const Header = () => {
+    const { user, logout } = useAuth();
+
+    const openRegister = () => {
+        // @ts-ignore
+        if (window && (window as any).$) {
+            const $ = (window as any).$;
+            if ($) {
+                $('#registerModal').modal('show');
+            }
+        }
+    };
+
+    const openSignIn = () => {
+        // @ts-ignore
+        if (window && (window as any).$) {
+            const $ = (window as any).$;
+            if ($) {
+                $('#signinModal').modal('show');
+            }
+        }
+    };
+
+    const onLogout = async () => {
+        await logout();
+    };
+
     return (
         <header id="header" className="fixed-top">
             <div className="header-inner">
@@ -19,18 +47,51 @@ const Header = () => {
                 {/* Begin header tools */}
                 <div className="header-tools">
                     <ul>
-                        <li>
-                            {/* Sign In button opens auth modal */}
-                            <a
-                                href="#signin"
-                                className="btn btn-primary btn-sm text-uppercase"
-                                data-toggle="modal"
-                                data-target="#signinModal"
-                                title="Sign in"
-                            >
-                                <i className="fas fa-user"></i>&nbsp; Sign In
-                            </a>
-                        </li>
+                        {!user ? (
+                            <>
+                                <li>
+                                    <button
+                                        onClick={openSignIn}
+                                        className="btn btn-primary btn-sm text-uppercase"
+                                        title="Sign in"
+                                    >
+                                        <i className="fas fa-user"></i>&nbsp; Sign In
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        onClick={openRegister}
+                                        className="btn btn-link btn-sm text-uppercase"
+                                        title="Register"
+                                    >
+                                        Register
+                                    </button>
+                                </li>
+                            </>
+                        ) : (
+                            <li className="dropdown">
+                                <a
+                                    href="#0"
+                                    className="dropdown-toggle"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                    title="Account"
+                                >
+                                    <i className="fas fa-user-circle"></i>&nbsp; {user.username}
+                                    <span className="caret-2"><i className="fas fa-chevron-down"></i></span>
+                                </a>
+                                <ul className="dropdown-menu">
+                                    <li>
+                                        <Link to="/portfolio">My Profile</Link>
+                                    </li>
+                                    <li role="separator" className="divider"></li>
+                                    <li>
+                                        <a href="#logout" onClick={(e) => { e.preventDefault(); onLogout(); }}>Logout</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        )}
                     </ul>
                 </div>
                 {/* End header tools */}
@@ -59,7 +120,7 @@ const Header = () => {
                         <div className="collapse navbar-collapse" id="navbar-collapse-1">
                             <ul className="nav navbar-nav navbar-right">
 
-                                {/* Home dropdown */}
+                                {/* Home button */}
                                 <li className="active"><Link to="/">Home</Link></li>
 
                                 {/* Portfolio button */}
@@ -67,96 +128,24 @@ const Header = () => {
                                     <Link to="/portfolio">Portfolio</Link>
                                 </li>
 
-                                {/* Gallery dropdown */}
+                                {/* Gallery button */}
                                 <li><Link to="/gallery">Gallery</Link></li>
 
-
-
-                                {/*/!* Blog dropdown *!/*/}
-                                {/*<li className="dropdown dropdown-hover">*/}
-                                {/*    <a*/}
-                                {/*        href="#0"*/}
-                                {/*        className="dropdown-toggle"*/}
-                                {/*        data-toggle="dropdown"*/}
-                                {/*        aria-haspopup="true"*/}
-                                {/*        aria-expanded="false"*/}
-                                {/*    >*/}
-                                {/*        Blog <span className="caret-2"><i className="fas fa-chevron-down"></i></span>*/}
-                                {/*    </a>*/}
-                                {/*    <ul className="dropdown-menu">*/}
-                                {/*        <li><Link to="/blog-list-sidebar-right">Blog List</Link></li>*/}
-                                {/*        <li><Link to="/blog-single-sidebar-right">Blog Single</Link></li>*/}
-                                {/*    </ul>*/}
-                                {/*</li>*/}
-
-                                {/*/!* Pages dropdown *!/*/}
-                                {/*<li className="dropdown dropdown-hover">*/}
-                                {/*    <a*/}
-                                {/*        href="#0"*/}
-                                {/*        className="dropdown-toggle"*/}
-                                {/*        data-toggle="dropdown"*/}
-                                {/*        aria-haspopup="true"*/}
-                                {/*        aria-expanded="false"*/}
-                                {/*    >*/}
-                                {/*        Pages <span className="caret-2"><i className="fas fa-chevron-down"></i></span>*/}
-                                {/*    </a>*/}
-                                {/*    <ul className="dropdown-menu">*/}
-                                {/*        <li><Link to="/page-about-me">About Me</Link></li>*/}
-                                {/*        <li><Link to="/page-about-us">About Us</Link></li>*/}
-                                {/*        <li><Link to="/page-faq">FAQ</Link></li>*/}
-                                {/*        <li><Link to="/page-login-register">Login/Register</Link></li>*/}
-                                {/*        <li><Link to="/page-contact">Contact</Link></li>*/}
-                                {/*        <li><Link to="/page-404">404 Error</Link></li>*/}
-                                {/*    </ul>*/}
-                                {/*</li>*/}
-
-                                {/* Features dropdown */}
-                                {/*<li className="dropdown dropdown-hover dropdown-menu-right">*/}
-                                {/*    <a*/}
-                                {/*        href="#0"*/}
-                                {/*        className="dropdown-toggle"*/}
-                                {/*        data-toggle="dropdown"*/}
-                                {/*        aria-haspopup="true"*/}
-                                {/*        aria-expanded="false"*/}
-                                {/*    >*/}
-                                {/*        Features <span className="caret-2"><i className="fas fa-chevron-down"></i></span>*/}
-                                {/*    </a>*/}
-                                {/*    /!*<ul className="dropdown-menu">*!/*/}
-                                {/*    /!*    <li className="dropdown dropdown-submenu dropdown-hover">*!/*/}
-                                {/*    /!*        <a*!/*/}
-                                {/*    /!*            href="#0"*!/*/}
-                                {/*    /!*            className="dropdown-toggle keep-inside-screen"*!/*/}
-                                {/*    /!*            data-toggle="dropdown"*!/*/}
-                                {/*    /!*            aria-haspopup="true"*!/*/}
-                                {/*    /!*            aria-expanded="false"*!/*/}
-                                {/*    /!*        >*!/*/}
-                                {/*    /!*            Header <span className="caret-2"><i className="fas fa-chevron-right"></i></span>*!/*/}
-                                {/*    /!*        </a>*!/*/}
-                                {/*    /!*        <ul className="dropdown-menu">*!/*/}
-                                {/*    /!*            <li><Link to="/features-header-static">Static</Link></li>*!/*/}
-                                {/*    /!*            <li><Link to="/features-header-fixed">Fixed</Link></li>*!/*/}
-                                {/*    /!*            <li><Link to="/features-header-show-hide-on-scroll">Fly Up/Down</Link></li>*!/*/}
-                                {/*    /!*        </ul>*!/*/}
-                                {/*    /!*    </li>*!/*/}
-
-                                {/*    /!*    <li className="dropdown dropdown-submenu dropdown-hover">*!/*/}
-                                {/*    /!*        <a*!/*/}
-                                {/*    /!*            href="#0"*!/*/}
-                                {/*    /!*            className="dropdown-toggle keep-inside-screen"*!/*/}
-                                {/*    /!*            data-toggle="dropdown"*!/*/}
-                                {/*    /!*            aria-haspopup="true"*!/*/}
-                                {/*    /!*            aria-expanded="false"*!/*/}
-                                {/*    /!*        >*!/*/}
-                                {/*    /!*            Components <span className="caret-2"><i className="fas fa-chevron-right"></i></span>*!/*/}
-                                {/*    /!*        </a>*!/*/}
-                                {/*    /!*        <ul className="dropdown-menu">*!/*/}
-                                {/*    /!*            <li><Link to="/components-accordion">Accordion</Link></li>*!/*/}
-                                {/*    /!*            <li><Link to="/components-tabs">Tabs</Link></li>*!/*/}
-                                {/*    /!*            <li><Link to="/components-buttons">Buttons</Link></li>*!/*/}
-                                {/*    /!*        </ul>*!/*/}
-                                {/*    /!*    </li>*!/*/}
-                                {/*    /!*</ul>*!/*/}
-                                {/*</li>*/}
+                                {/* Rapports & Réclamations (only for logged in users) */}
+                                {user && (
+                                    <>
+                                        <li>
+                                            <Link to="/rapports">
+                                                <i className="fas fa-file-alt"></i> Rapports
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link to="/reclamations">
+                                                <i className="fas fa-exclamation-circle"></i> Réclamations
+                                            </Link>
+                                        </li>
+                                    </>
+                                )}
 
                             </ul>
                         </div>
