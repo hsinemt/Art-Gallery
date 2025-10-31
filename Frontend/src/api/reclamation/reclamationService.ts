@@ -1,10 +1,11 @@
+// api/reclamation/reclamationService.ts
 import axios from '../axios';
 import type { Reclamation } from '../../types';
 
 const API_URL = '/api/reclamation/';
 
 export interface CreateReclamationData {
-    cible?: number;
+    cible_id?: number;
     sujet: 'system' | 'user';
     contenu: string;
 }
@@ -28,7 +29,8 @@ export const reclamationService = {
     },
 
     updateReclamation: async (id: number, data: Partial<CreateReclamationData>): Promise<Reclamation> => {
-        const response = await axios.patch(`${API_URL}${id}/`, data);
+        const token = localStorage.getItem('auth_token');
+        const response = await axios.patch(`${API_URL}${id}/`, data, token ? { headers: { Authorization: `Token ${token}` } } : undefined);
         return response.data;
     },
 
@@ -36,14 +38,12 @@ export const reclamationService = {
         await axios.delete(`${API_URL}${id}/`);
     },
 
-    // Obtenir les réclamations reçues par l'utilisateur
     getReceivedReclamations: async (): Promise<Reclamation[]> => {
         const token = localStorage.getItem('auth_token');
         const response = await axios.get(`${API_URL}received/`, token ? { headers: { Authorization: `Token ${token}` } } : undefined);
         return response.data;
     },
 
-    // Obtenir les réclamations envoyées par l'utilisateur
     getSentReclamations: async (): Promise<Reclamation[]> => {
         const token = localStorage.getItem('auth_token');
         const response = await axios.get(`${API_URL}sent/`, token ? { headers: { Authorization: `Token ${token}` } } : undefined);

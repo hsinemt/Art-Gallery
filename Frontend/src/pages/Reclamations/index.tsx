@@ -463,7 +463,7 @@ const ReclamationsPage = () => {
                                                         <strong>
                                                             {activeTab === 'received'
                                                                 ? (reclamation.auteur?.username || '—')
-                                                                : (reclamation.cible?.username || '_')}
+                                                                : (reclamation.cible?.username || 'Système')}
                                                         </strong>
                                                     </td>
                                                 )}

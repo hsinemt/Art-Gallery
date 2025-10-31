@@ -6,14 +6,25 @@ from .serializers import RapportSerializer
 
 
 class RapportViewSet(viewsets.ModelViewSet):
-    queryset = Rapport.objects.all()
     serializer_class = RapportSerializer
-    # Allow read-only to everyone, creation/update/delete require authentication
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [TokenAuthentication]
-    # Support multipart form data for image upload
     parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]
 
+    def get_queryset(self):
+        """
+        Retourne les rapports de l'utilisateur connecté.
+        Si l'utilisateur est admin/superuser, retourne tous les rapports.
+        """
+        user = self.request.user
+        
+        # Vérifier si l'utilisateur est admin/superuser
+        if user.is_superuser or user.is_staff:
+            return Rapport.objects.all().order_by('-created_at')
+        
+        # Sinon, retourner uniquement les rapports de l'utilisateur
+        return Rapport.objects.filter(user=user).order_by('-created_at')
+
     def perform_create(self, serializer):
-        # set the owner/user automatically
+        """Définir automatiquement l'utilisateur lors de la création"""
         serializer.save(user=self.request.user)

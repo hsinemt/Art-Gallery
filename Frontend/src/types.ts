@@ -13,7 +13,7 @@ export interface Rapport {
     name: string;
     type: 'descriptif' | 'analyse' | 'evaluation';
     picture: string;
-    result?: string;
+    result: string;
     created_at: string;
 }
 
