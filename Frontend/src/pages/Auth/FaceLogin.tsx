@@ -18,7 +18,7 @@ const FaceLogin: React.FC<FaceLoginProps> = ({ inModal = false, onComplete }) =>
     const [faceImage, setFaceImage] = useState<Blob | null>(null);
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const { refreshUser } = useAuth();
-//test
+
     // Reset component state when it mounts
     useEffect(() => {
         // Reset all states when component mounts
