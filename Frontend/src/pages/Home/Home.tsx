@@ -34,13 +34,15 @@ const Home = () => {
                                 {items.slice(0, 12).map((p) => (
                                     <div className="col-md-4" key={p.id}>
                                         <div className="card pub-card h-100">
-                                            {p.image ? (
-                                                <img src={p.image} className="card-img-top" alt={p.title} />
-                                            ) : (
-                                                <div className="pub-placeholder">Aucune image</div>
-                                            )}
+                                            <Link to={`/publications/${p.id}`}>
+                                                {p.image ? (
+                                                    <img src={p.image} className="card-img-top" alt={p.title} />
+                                                ) : (
+                                                    <div className="pub-placeholder">Aucune image</div>
+                                                )}
+                                            </Link>
                                             <div className="card-body">
-                                                <h5 className="card-title">{p.title}</h5>
+                                                <h5 className="card-title"><Link to={`/publications/${p.id}`}>{p.title}</Link></h5>
                                                 <p className="card-text small text-muted">{p.creation_date}</p>
                                                 <div className="d-flex align-items-center gap-2">
                                                     <span className="small">par</span>

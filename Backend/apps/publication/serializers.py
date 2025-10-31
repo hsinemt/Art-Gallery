@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Publication
+from .models import Publication, Comment
 
 
 class PublicationSerializer(serializers.ModelSerializer):
@@ -24,6 +24,24 @@ class PublicationSerializer(serializers.ModelSerializer):
     def get_artist_username(self, obj):
         try:
             return getattr(obj.artist, 'username', None)
+        except Exception:
+            return None
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author_username = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id', 'publication', 'author', 'author_username', 'content',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['author', 'created_at', 'updated_at']
+
+    def get_author_username(self, obj):
+        try:
+            return getattr(obj.author, 'username', None)
         except Exception:
             return None
 

@@ -1,8 +1,11 @@
 from rest_framework import viewsets, permissions
 from rest_framework.permissions import SAFE_METHODS
-from .models import Publication
-from .serializers import PublicationSerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .models import Publication, Comment
+from .serializers import PublicationSerializer, CommentSerializer
 from .utils import generate_image_from_description
+from .utils_ai import summarize_text
 
 
 class IsArtistOrReadOnly(permissions.BasePermission):
@@ -31,6 +34,13 @@ class PublicationViewSet(viewsets.ModelViewSet):
             except Exception:
                 pass
         return qs
+
+    @action(detail=True, methods=['get'], url_path='comments')
+    def list_comments(self, request, pk=None):
+        publication = self.get_object()
+        comments = publication.comments.select_related('author').all()
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         # Default artist to current user if not provided
@@ -67,3 +77,38 @@ class PublicationViewSet(viewsets.ModelViewSet):
             if content is not None:
                 filename = f"generated_{instance.pk}.png"
                 instance.image.save(filename, content, save=True)
+
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return getattr(obj, 'author_id', None) == getattr(request.user, 'id', None)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.select_related('author', 'publication').all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        publication_id = self.request.query_params.get('publication')
+        if publication_id:
+            qs = qs.filter(publication_id=publication_id)
+        return qs
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    @action(detail=False, methods=['get'], url_path='summary')
+    def summary(self, request):
+        publication_id = request.query_params.get('publication')
+        if not publication_id:
+            return Response({'detail': 'publication param is required'}, status=400)
+        comments = Comment.objects.filter(publication_id=publication_id).order_by('-created_at')[:50]
+        text = "\n".join([c.content for c in comments])
+        result = summarize_text(text)
+        if not result:
+            return Response({'summary': None, 'detail': 'AI not configured'}, status=200)
+        return Response({'summary': result}, status=200)

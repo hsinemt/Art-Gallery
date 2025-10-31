@@ -22,4 +22,31 @@
 .modal-image img { display: block; max-width: 90vw; max-height: 80vh; width: auto; height: auto; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
 .close-btn { position: absolute; right: 0; top: -48px; }
 
+/* Buttons - soft variants */
+.btn-soft { background: #f3f0ff; color: #5f3dc4; border: 1px solid #e5dbff; }
+.btn-soft:hover { background: #e5dbff; color: #4c2fbf; }
+.btn-soft-secondary { background: #f1f3f5; color: #495057; border: 1px solid #dee2e6; }
+.btn-soft-secondary:hover { background: #e9ecef; color: #343a40; }
+.btn-soft-info { background: #e7f5ff; color: #0b7285; border: 1px solid #d0ebff; }
+.btn-soft-info:hover { background: #d0ebff; color: #0a6371; }
+
+/* Comments improved UI */
+.comment.media { display: flex; gap: 10px; }
+.avatar-circle { flex: 0 0 34px; width: 34px; height: 34px; border-radius: 50%; background: #e9ecef; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #495057; }
+.media-body { flex: 1; }
+.comment-header { display: flex; align-items: center; gap: 6px; }
+.comment-header .author { font-weight: 600; }
+.comment-header .dot { color: #adb5bd; }
+.bubble { background: #f8f9fa; border: 1px solid #f1f3f5; border-radius: 10px; padding: 8px 10px; }
+.comment.composer { display: flex; gap: 8px; align-items: center; }
+.btn-xs { font-size: 12px; }
+
+/* Summary styles */
+.summary-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 10px; padding: 12px; }
+.summary-card.warning { background: #fff3bf; border-color: #ffe066; }
+.summary-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #fff; color: #0b7285; border: 1px solid #d0ebff; }
+.summary-text { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12.5px; margin: 0; }
+.summary-actions { margin-top: 8px; display: flex; gap: 8px; }
+.summary-loading { color: #495057; }
+
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPublication, deletePublication, listPublications, updatePublication } from '../../api/publications';
 import type { Publication } from '../../api/publications';
+import { listComments, createComment as apiCreateComment, updateComment as apiUpdateComment, deleteComment as apiDeleteComment, summarizeComments } from '../../api/comments';
 import { useAuth } from '../../context/AuthContext';
 import './publications.css';
 
@@ -23,6 +24,10 @@ const PublicationsPage: React.FC = () => {
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [activeComments, setActiveComments] = useState<Record<number, any[]>>({});
+  const [newComment, setNewComment] = useState<Record<number, string>>({});
+  const [summary, setSummary] = useState<string | null>(null);
+  const [showSummaryFor, setShowSummaryFor] = useState<number | null>(null);
 
   const canWrite = useMemo(() => !!user, [user]);
 
@@ -42,6 +47,13 @@ const PublicationsPage: React.FC = () => {
   useEffect(() => {
     fetchAll();
   }, []);
+
+  const loadComments = async (pubId: number) => {
+    try {
+      const data = await listComments(pubId);
+      setActiveComments((prev) => ({ ...prev, [pubId]: data.slice(0, 3) }));
+    } catch (_) { /* ignore */ }
+  };
 
   const onCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,6 +103,29 @@ const PublicationsPage: React.FC = () => {
     }
   };
 
+  const onAddComment = async (pubId: number) => {
+    const content = newComment[pubId]?.trim();
+    if (!content) return;
+    try {
+      await apiCreateComment(pubId, content);
+      setNewComment((p) => ({ ...p, [pubId]: '' }));
+      await loadComments(pubId);
+    } catch (_) { /* ignore */ }
+  };
+
+  const onDeleteComment = async (pubId: number, commentId: number) => {
+    try {
+      await apiDeleteComment(commentId);
+      await loadComments(pubId);
+    } catch (_) { /* ignore */ }
+  };
+
+  const onSummarize = async (pubId: number) => {
+    setShowSummaryFor(pubId);
+    const s = await summarizeComments(pubId);
+    setSummary(s || 'Pas de résumé disponible.');
+  };
+
   return (
     <div className="publications-page container">
       <h2 className="mb-4">Publications</h2>
@@ -135,19 +170,58 @@ const PublicationsPage: React.FC = () => {
           {items.map((p) => (
             <div className="col-md-4" key={p.id}>
               <div className="card pub-card h-100">
-                {p.image ? (
-                  <img src={p.image} className="card-img-top pub-thumb" alt={p.title} onClick={() => setPreviewUrl(p.image || null)} />
-                ) : (
-                  <div className="pub-placeholder">Aucune image</div>
-                )}
+                <a href={`/publications/${p.id}`}>
+                  {p.image ? (
+                    <img src={p.image} className="card-img-top pub-thumb" alt={p.title} />
+                  ) : (
+                    <div className="pub-placeholder">Aucune image</div>
+                  )}
+                </a>
                 <div className="card-body">
-                  <h5 className="card-title">{p.title}</h5>
+                  <h5 className="card-title"><a href={`/publications/${p.id}`}>{p.title}</a></h5>
                   <p className="card-text small text-muted">{p.creation_date}</p>
                   <div className="d-flex align-items-center gap-2 mb-2">
                     <span className="small">par</span>
                     <a className="small" href={`/artist/${p.artist}`}>{p.artist_username || `Artiste #${p.artist}`}</a>
                   </div>
                   {p.description && <p className="card-text">{p.description}</p>}
+                  {/* Comments preview */}
+                  <div className="mt-3">
+                    <div className="d-flex gap-2 mb-2">
+                      <button className="btn btn-soft btn-sm" onClick={() => loadComments(p.id)}>
+                        <i className="fas fa-comments"></i>&nbsp; Voir commentaires
+                      </button>
+                      <button className="btn btn-soft-info btn-sm" onClick={() => onSummarize(p.id)}>
+                        <i className="fas fa-lightbulb"></i>&nbsp; Résumé IA
+                      </button>
+                    </div>
+                    {(activeComments[p.id] || []).map((c: any) => (
+                      <div className="comment media mt-2" key={c.id}>
+                        <div className="avatar-circle" title={c.author_username ?? c.author}>
+                          {(c.author_username ?? String(c.author)).charAt(0).toUpperCase()}
+                        </div>
+                        <div className="media-body">
+                          <div className="comment-header">
+                            <strong className="author">{c.author_username ?? c.author}</strong>
+                            <span className="dot">•</span>
+                            <span className="time small text-muted">{c.created_at ? new Date(c.created_at).toLocaleString() : ''}</span>
+                            {user && String(user.id) === String(c.author) && (
+                              <button className="btn btn-link btn-xs text-danger ml-auto" onClick={() => onDeleteComment(p.id, c.id)}>Supprimer</button>
+                            )}
+                          </div>
+                          <div className="bubble">
+                            {c.content}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {user && (
+                      <div className="comment composer mt-3">
+                        <input className="form-control form-control-sm" placeholder="Ajouter un commentaire" value={newComment[p.id] || ''} onChange={(e) => setNewComment((prev) => ({ ...prev, [p.id]: e.target.value }))} />
+                        <button className="btn btn-gradient btn-sm" onClick={() => onAddComment(p.id)}>Envoyer</button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {canWrite && (
                   <div className="card-footer d-flex gap-2">
@@ -196,6 +270,37 @@ const PublicationsPage: React.FC = () => {
           <div className="modal-image" onClick={(e) => e.stopPropagation()}>
             <img src={previewUrl} alt="aperçu" />
             <button className="btn btn-cancel close-btn" onClick={() => setPreviewUrl(null)}>Fermer</button>
+          </div>
+        </div>
+      )}
+
+      {/* Summary modal */}
+      {showSummaryFor !== null && (
+        <div className="modal-backdrop-custom" onClick={() => { setShowSummaryFor(null); setSummary(null); }}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-card-header d-flex align-items-center justify-content-between">
+              <div className="d-flex align-items-center gap-2">
+                <span className="summary-icon"><i className="fas fa-lightbulb"></i></span>
+                <strong>Résumé des commentaires</strong>
+              </div>
+              <button className="btn btn-cancel" onClick={() => { setShowSummaryFor(null); setSummary(null); }}>Fermer</button>
+            </div>
+            <div className="modal-card-body">
+              {summary ? (
+                <div className="summary-card">
+                  <pre className="summary-text">{summary}</pre>
+                  <div className="summary-actions">
+                    <button className="btn btn-soft-info btn-sm" onClick={() => navigator.clipboard.writeText(summary || '')}>
+                      <i className="fas fa-copy"></i>&nbsp; Copier
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="summary-loading">
+                  <i className="fas fa-spinner fa-spin"></i>&nbsp; Génération du résumé…
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
