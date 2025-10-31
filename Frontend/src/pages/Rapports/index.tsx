@@ -3,6 +3,7 @@ import type { Rapport } from '../../types';
 import { rapportService } from '../../api/rapport/rapportService';
 import { useAuth } from '../../context/AuthContext';
 import PageLayout from '../../component/Layout/PageLayout';
+import Modal from '../../component/Modal/Modal';
 
 const RapportsPage = () => {
     const [rapports, setRapports] = useState<Rapport[]>([]);
@@ -12,6 +13,7 @@ const RapportsPage = () => {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [pendingReportId, setPendingReportId] = useState<number | null>(null);
     const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+    const [selectedRapport, setSelectedRapport] = useState<Rapport | null>(null);
     const { user } = useAuth();
 
     const [formData, setFormData] = useState({
@@ -191,11 +193,20 @@ const RapportsPage = () => {
                             {rapports.map((rapport) => (
                                 <div key={rapport.id} className="col-12 col-sm-6 col-md-4 mb-4">
                                     <div className="card h-100 shadow-sm">
-                                        <div style={{ height: 180, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa' }}>
+                                        <div 
+                                            style={{ height: 180, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa', cursor: 'pointer' }}
+                                            onClick={() => setSelectedRapport(rapport)}
+                                        >
                                             <img src={rapport.picture} alt={rapport.name} style={{ maxHeight: '100%', width: 'auto' }} />
                                         </div>
                                         <div className="card-body d-flex flex-column">
-                                            <h5 className="card-title mb-1">{rapport.name}</h5>
+                                            <h5 
+                                                className="card-title mb-1" 
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => setSelectedRapport(rapport)}
+                                            >
+                                                {rapport.name}
+                                            </h5>
                                             <div className="mb-2">
                                                 <span className={`badge badge-${rapport.type === 'descriptif' ? 'secondary' : rapport.type === 'analyse' ? 'info' : 'primary'}`}>{rapport.type}</span>
                                             </div>
@@ -237,6 +248,53 @@ const RapportsPage = () => {
                     </div>
                 </div>
             )}
+
+            {/* Modal pour les détails du rapport */}
+            <Modal
+                isOpen={selectedRapport !== null}
+                onClose={() => setSelectedRapport(null)}
+                title={selectedRapport?.name || "Détails du rapport"}
+            >
+                {selectedRapport && (
+                    <div>
+                        <div className="text-center mb-4">
+                            <img 
+                                src={selectedRapport.picture} 
+                                alt={selectedRapport.name} 
+                                style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'contain' }} 
+                            />
+                        </div>
+                        <div className="mb-3">
+                            <h6>Type :</h6>
+                            <span className={`badge badge-${selectedRapport.type === 'descriptif' ? 'secondary' : selectedRapport.type === 'analyse' ? 'info' : 'primary'}`}>
+                                {selectedRapport.type}
+                            </span>
+                        </div>
+                        <div className="mb-3">
+                            <h6>Date de création :</h6>
+                            <p>{new Date(selectedRapport.created_at).toLocaleDateString('fr-FR', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}</p>
+                        </div>
+                        <div>
+                            <h6>Résultat :</h6>
+                            {selectedRapport.result ? (
+                                <div className="p-3 bg-light rounded">
+                                    <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
+                                        {selectedRapport.result}
+                                    </pre>
+                                </div>
+                            ) : (
+                                <p className="text-muted">En attente de génération...</p>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </Modal>
         </PageLayout>
     );
 };

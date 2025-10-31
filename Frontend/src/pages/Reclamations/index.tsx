@@ -4,6 +4,7 @@ import { reclamationService } from '../../api/reclamation/reclamationService';
 import { userService } from '../../api/users/userService';
 import { useAuth } from '../../context/AuthContext';
 import PageLayout from '../../component/Layout/PageLayout';
+import Modal from '../../component/Modal/Modal';
 
 const ReclamationsPage = () => {
     const [reclamations, setReclamations] = useState<Reclamation[]>([]);
@@ -12,6 +13,7 @@ const ReclamationsPage = () => {
     const [activeTab, setActiveTab] = useState<'received' | 'sent' | 'all'>('received');
     const [isAdmin, setIsAdmin] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
+    const [selectedReclamation, setSelectedReclamation] = useState<Reclamation | null>(null);
     const { user, loading: authLoading } = useAuth();
 
     const [formData, setFormData] = useState({
@@ -445,19 +447,23 @@ const ReclamationsPage = () => {
                                 </thead>
                                 <tbody>
                                     {reclamations.map((reclamation) => (
-                                        <tr key={reclamation.id}>
+                                        <tr 
+                                            key={reclamation.id} 
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => setSelectedReclamation(reclamation)}
+                                        >
                                             <td>{reclamation.date_creation ? new Date(reclamation.date_creation).toLocaleDateString('fr-FR') : '—'}</td>
                                                 {isAdmin ? (
                                                     <>
                                                         <td><strong>{reclamation.auteur?.username || '—'}</strong></td>
-                                                        <td><strong>{reclamation.cible?.username || 'Système'}</strong></td>
+                                                        <td><strong>{reclamation.cible?.username || '_'}</strong></td>
                                                     </>
                                                 ) : (
                                                     <td>
                                                         <strong>
                                                             {activeTab === 'received'
                                                                 ? (reclamation.auteur?.username || '—')
-                                                                : (reclamation.cible?.username || 'Système')}
+                                                                : (reclamation.cible?.username || '_')}
                                                         </strong>
                                                     </td>
                                                 )}
@@ -476,7 +482,7 @@ const ReclamationsPage = () => {
                                                     {reclamation.sentiment_local && getSentimentBadge(reclamation.sentiment_local)}
                                                 </td>
                                             )}
-                                            <td>
+                                            <td onClick={e => e.stopPropagation()}>
                                                 {activeTab === 'sent' && (
                                                     <>
                                                         <button
@@ -511,6 +517,91 @@ const ReclamationsPage = () => {
                     )}
                 </div>
             </div>
+
+            {/* Modal pour les détails de la réclamation */}
+            <Modal
+                isOpen={selectedReclamation !== null}
+                onClose={() => setSelectedReclamation(null)}
+                title="Détails de la réclamation"
+            >
+                {selectedReclamation && (
+                    <div>
+                        <div className="mb-3">
+                            <h6>Date :</h6>
+                            <p>{selectedReclamation.date_creation ? 
+                                new Date(selectedReclamation.date_creation).toLocaleDateString('fr-FR', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) : '—'
+                            }</p>
+                        </div>
+
+                        <div className="mb-3">
+                            <h6>Type :</h6>
+                            <span className={`badge badge-${selectedReclamation.sujet === 'system' ? 'primary' : 'info'}`}>
+                                {selectedReclamation.sujet}
+                            </span>
+                        </div>
+
+                        {selectedReclamation.sujet === 'user' && (
+                            <div className="mb-3">
+                                <h6>Utilisateur ciblé :</h6>
+                                <p><strong>{selectedReclamation.cible?.username || '—'}</strong></p>
+                            </div>
+                        )}
+
+                        <div className="mb-3">
+                            <h6>Auteur :</h6>
+                            <p><strong>{selectedReclamation.auteur?.username || '—'}</strong></p>
+                        </div>
+
+                        <div className="mb-3">
+                            <h6>Contenu :</h6>
+                            <div className="p-3 bg-light rounded">
+                                <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
+                                    {selectedReclamation.contenu}
+                                </pre>
+                            </div>
+                        </div>
+
+                        {isAdmin && selectedReclamation.sentiment_local && (
+                            <div className="mb-3">
+                                <h6>Analyse du sentiment :</h6>
+                                {getSentimentBadge(selectedReclamation.sentiment_local)}
+                            </div>
+                        )}
+
+                        {activeTab === 'sent' && (
+                            <div className="mt-4">
+                                <button
+                                    onClick={() => {
+                                        handleEditClick(selectedReclamation);
+                                        setSelectedReclamation(null);
+                                    }}
+                                    className="btn btn-warning mr-2"
+                                    style={{ marginRight: '10px' }}
+                                >
+                                    Modifier
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm('Êtes-vous sûr de vouloir supprimer cette réclamation ?')) {
+                                            handleDelete(selectedReclamation.id);
+                                            setSelectedReclamation(null);
+                                        }
+                                    }}
+                                    className="btn btn-danger"
+                                >
+                                    Supprimer
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </Modal>
         </PageLayout>
     );
 };

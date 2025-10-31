@@ -11,7 +11,7 @@ class ReclamationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reclamation
         fields = '__all__'
-        read_only_fields = ['sentiment_local', 'emotions_local', 'date_creation']
+        read_only_fields = ['sentiment_local', 'emotions_local', 'date_creation','auteur', 'cible']
 
     def create(self, validated_data):
         # Calcul automatique des sentiments
