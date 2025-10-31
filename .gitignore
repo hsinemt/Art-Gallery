@@ -1,5 +1,5 @@
 # Root Git ignore for ArtGallery project (Django + Frontend)
-
+.gitignore
 # --------------------
 # Python / Django
 # --------------------
@@ -42,6 +42,7 @@ env/
 ENV/
 Backend/artVenv/
 Backend/artVenv/**
+Backend/.env
 
 # Testing / coverage
 .coverage
