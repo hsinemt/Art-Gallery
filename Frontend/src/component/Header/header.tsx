@@ -127,8 +127,10 @@ const Header = () => {
                                     <Link to="/portfolio">Portfolio</Link>
                                 </li>
 
-                                {/* Gallery button */}
-                                <li><Link to="/gallery">Gallery</Link></li>
+                                {/* Publications quick access */}
+                                <li>
+                                    <Link to="/publications">Publications</Link>
+                                </li>
 
                             </ul>
                         </div>
