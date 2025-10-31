@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 
 import Home from './pages/Home/Home.tsx';
 import Portfolio from './pages/Portfolio/portfolio.tsx';
+import FaceRegistration from './pages/Auth/FaceRegistration.tsx';
+import FaceLogin from './pages/Auth/FaceLogin.tsx';
 import './App.css';
 import Preloader from "./component/Preloader/preloader.tsx";
 import Header from "./component/Header/header.tsx";
@@ -34,6 +36,8 @@ function App() {
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/portfolio" element={<Portfolio />} />
+                            <Route path="/register" element={<FaceRegistration />} />
+                            <Route path="/login" element={<FaceLogin />} />
                             {/* Add more routes here as needed */}
                         </Routes>
                     </div>

@@ -14,6 +14,10 @@ class User(AbstractUser):
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
+    # Face recognition fields
+    face_encoding = models.JSONField(blank=True, null=True)
+    face_image = models.ImageField(upload_to='face_images/', blank=True, null=True)
+    face_verified = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         # Automatically set user_type to 'admin' for superusers
