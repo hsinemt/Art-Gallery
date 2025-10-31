@@ -5,6 +5,8 @@ import Home from './pages/Home/Home.tsx';
 import Portfolio from './pages/Portfolio/portfolio.tsx';
 import PublicationsPage from './pages/Publications/Publications.tsx';
 import ArtistProfile from './pages/Artist/ArtistProfile.tsx';
+import FaceRegistration from './pages/Auth/FaceRegistration.tsx';
+import FaceLogin from './pages/Auth/FaceLogin.tsx';
 import './App.css';
 import Preloader from "./component/Preloader/preloader.tsx";
 import Header from "./component/Header/header.tsx";
@@ -38,6 +40,8 @@ function App() {
                             <Route path="/portfolio" element={<Portfolio />} />
                             <Route path="/publications" element={<PublicationsPage />} />
                             <Route path="/artist/:id" element={<ArtistProfile />} />
+                            <Route path="/register" element={<FaceRegistration />} />
+                            <Route path="/login" element={<FaceLogin />} />
                             {/* Add more routes here as needed */}
                         </Routes>
                     </div>

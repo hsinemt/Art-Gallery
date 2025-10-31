@@ -3,7 +3,8 @@ from .views import (
     RegisterView,
     LoginView,
     LogoutView,
-    UserProfileView
+    UserProfileView,
+    FaceUploadView,
 )
 
 app_name = 'users'
@@ -13,4 +14,5 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('profile/', UserProfileView.as_view(), name='profile'),
+    path('upload-face/', FaceUploadView.as_view(), name='upload-face'),
 ]
