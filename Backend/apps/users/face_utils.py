@@ -46,6 +46,8 @@ def get_face_encoding_from_image(image_file) -> List[float]:
 def _detect_and_crop_face_cv2(image_path_or_bytes) -> Optional[_np.ndarray]:
     """Detect the first face with OpenCV Haarcascade and return the cropped grayscale face as numpy array.
 
+
+
     Accepts either a filesystem path (str/Path) or bytes-like object.
     Returns None if no face is found or if OpenCV is not available.
     """
