@@ -1,0 +1,63 @@
+/* Scoped footer overrides and enhancements for the app footer
+   This file supplements public/assets/css/theme.css (Footer section)
+   and only tweaks layout/spacing to avoid the footer looking "small".
+   It is intentionally narrow in scope via the .app-footer class. */
+
+/* Make the footer full-bleed (escape centered #root padding/max-width) */
+#footer.app-footer {
+  /* full width regardless of parent max-width/padding */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+/* Layout and spacing */
+#footer.app-footer .footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* slightly larger vertical rhythm than theme's 17px */
+  padding-top: 28px;
+  padding-bottom: 28px;
+  /* keep horizontal padding consistent with theme on desktop */
+  padding-left: 24px;
+  padding-right: 24px;
+  min-height: 80px; /* avoid looking too short */
+  box-sizing: border-box;
+}
+
+/* Improve social icons layout spacing without changing theme semantics */
+#footer.app-footer .social-icons ul {
+  display: flex;
+  gap: 14px;
+}
+#footer.app-footer .social-icons ul > li {
+  margin: 0; /* gap handles spacing */
+}
+
+/* Typography adjustments for better legibility */
+#footer.app-footer .copyright {
+  letter-spacing: 0.04em;
+}
+
+/* Responsive behavior */
+@media (min-width: 991px) {
+  #footer.app-footer .footer-inner {
+    padding-left: 40px;  /* matches theme */
+    padding-right: 40px; /* matches theme */
+  }
+}
+
+@media (max-width: 767px) {
+  #footer.app-footer .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding-top: 22px;
+    padding-bottom: 22px;
+    min-height: 0; /* allow natural height on small screens */
+  }
+  #footer.app-footer .social-icons {
+    text-align: left; /* ensure left align on mobile */
+  }
+}

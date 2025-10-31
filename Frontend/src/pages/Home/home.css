@@ -1,0 +1,59 @@
+/* Home page specific CSS to fix the grid and make it full page */
+
+/* Optional: tune these if your actual header/footer heights differ */
+:root {
+  --header-height: 90px; /* fallback for header total height */
+  --footer-height: 80px; /* fallback for footer total height */
+}
+
+/* Full-bleed wrapper to escape #root max-width and paddings */
+.home-fullbleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: 0; /* remove inner padding if any */
+}
+
+/* Ensure the inner content container has no padding */
+.home-fullbleed .content-wrap {
+  padding: 0;
+}
+
+/* Make the photo wall occupy the remaining viewport height (4 rows * 20% each) */
+.home-fullbleed .photo-wall.full-page {
+  position: relative;
+  height: calc(100vh - var(--header-height, 90px) - var(--footer-height, 80px));
+  min-height: 480px; /* safety minimum so rows don’t collapse on very small screens */
+  background-color: #F7F7F7; /* light background to override theme black */
+}
+
+/* Clearfix for floated .pw-item elements */
+.home-fullbleed .photo-wall::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Make sure images fully cover their tiles */
+.home-fullbleed .photo-wall .pw-item .pw-item-img {
+  background-size: cover;
+  background-position: 50% 50%;
+}
+
+/* Responsive columns for the photo wall (scoped to home only) */
+/* Default in theme is 8 columns (12.5%) which we keep on large screens */
+@media (max-width: 1200px) {
+  .home-fullbleed .photo-wall .pw-item { width: 16.6667%; } /* 6 columns */
+}
+@media (max-width: 992px) {
+  .home-fullbleed .photo-wall .pw-item { width: 25%; } /* 4 columns */
+}
+@media (max-width: 768px) {
+  .home-fullbleed .photo-wall .pw-item { width: 33.3333%; } /* 3 columns */
+}
+@media (max-width: 576px) {
+  .home-fullbleed .photo-wall .pw-item { width: 50%; } /* 2 columns */
+}
+@media (max-width: 380px) {
+  .home-fullbleed .photo-wall .pw-item { width: 100%; } /* 1 column */
+}
