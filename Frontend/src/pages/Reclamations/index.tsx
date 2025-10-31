@@ -570,5 +570,6 @@ const ReclamationsPage = () => {
         </PageLayout>
     );
 };
+//test
 
 export default ReclamationsPage;
