@@ -1,5 +1,7 @@
 from pathlib import Path
 from decouple import config
+
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,7 +32,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'apps.users',
-    'apps.publication',
+    'apps.rapport',
+    'apps.reclamation',
+
 ]
 
 # Custom User Model
@@ -99,28 +103,16 @@ WSGI_APPLICATION = 'artGallery.wsgi.application'
 # }
 
 
-DB_ENGINE = config('DB_ENGINE', default='django.db.backends.sqlite3')
-
-if 'sqlite3' in DB_ENGINE:
-    # Simple sqlite config for local development
-    DATABASES = {
-        'default': {
-            'ENGINE': DB_ENGINE,
-            'NAME': BASE_DIR / config('DB_NAME', default='db.sqlite3'),
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': config('DB_ENGINE'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='5432'),
     }
-else:
-    # Production / external DB (Postgres, etc.)
-    DATABASES = {
-        'default': {
-            'ENGINE': DB_ENGINE,
-            'NAME': config('DB_NAME'),
-            'USER': config('DB_USER'),
-            'PASSWORD': config('DB_PASSWORD'),
-            'HOST': config('DB_HOST', default='localhost'),
-            'PORT': config('DB_PORT', default='5432'),
-        }
-    }
+}
 
 
 # Password validation
@@ -175,8 +167,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'http://localhost:5174',
-    'http://127.0.0.1:5174',
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -184,6 +174,4 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'http://localhost:5174',
-    'http://127.0.0.1:5174',
 ]

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { AuthUser, LoginPayload, RegisterPayload } from '../api/auth/auth';
-import { getCurrentUser, loginUser, logoutUser, registerUser } from '../api/auth/auth';
+import { getCurrentUser, loginUser, logoutUser, registerUser, getStoredToken } from '../api/auth/auth';
+import axios from '../api/axios';
 
 export type AuthContextValue = {
   user: AuthUser | null;
@@ -43,6 +44,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Some backends return user in response, else fetch it
     const u = (res as any).user ?? (await getCurrentUser());
     setUser(u ?? null);
+    // ensure axios instance uses the fresh token immediately
+    const token = getStoredToken();
+    if (token) {
+      axios.defaults.headers = axios.defaults.headers || {};
+      axios.defaults.headers['Authorization'] = `Token ${token}`;
+    }
   };
 
   const register = async (data: RegisterPayload) => {
@@ -50,6 +57,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await registerUser(data);
     const u = (res as any).user ?? (await getCurrentUser());
     setUser(u ?? null);
+    const token = getStoredToken();
+    if (token) {
+      axios.defaults.headers = axios.defaults.headers || {};
+      axios.defaults.headers['Authorization'] = `Token ${token}`;
+    }
   };
 
   const logout = async () => {

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import './header.css';
 
 const Header = () => {
     const { user, logout } = useAuth();
@@ -127,10 +128,24 @@ const Header = () => {
                                     <Link to="/portfolio">Portfolio</Link>
                                 </li>
 
-                                {/* Publications quick access */}
-                                <li>
-                                    <Link to="/publications">Publications</Link>
-                                </li>
+                                {/* Gallery button */}
+                                <li><Link to="/gallery">Gallery</Link></li>
+
+                                {/* Rapports & Réclamations (only for logged in users) */}
+                                {user && (
+                                    <>
+                                        <li>
+                                            <Link to="/rapports">
+                                                <i className="fas fa-file-alt"></i> Rapports
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link to="/reclamations">
+                                                <i className="fas fa-exclamation-circle"></i> Réclamations
+                                            </Link>
+                                        </li>
+                                    </>
+                                )}
 
                             </ul>
                         </div>
