@@ -23,7 +23,7 @@ flake8==7.1.0
 # AI / Machine Learning / NLP
 # -----------------------------------
 transformers==4.46.1
-torch==2.5.1
+torch==2.6.0
 torchvision==0.21.0
 scikit-learn==1.5.2
 numpy==1.26.4
