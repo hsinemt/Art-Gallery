@@ -13,8 +13,9 @@ python-decouple==3.8
 # -----------------------------------
 # Database & Deployment
 # -----------------------------------
-psycopg2==2.9.9        # For PostgreSQL (optional if using SQLite)
+psycopg2-binary==2.9.9  # Changed to psycopg2-binary for easier Render deployment
 gunicorn==21.2.0
+whitenoise==6.7.0       # Added for static files serving
 black==24.3.0
 flake8==7.1.0
 
