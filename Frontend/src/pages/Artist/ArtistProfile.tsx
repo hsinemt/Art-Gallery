@@ -7,7 +7,7 @@ const ArtistProfile: React.FC = () => {
   const { id } = useParams();
   const [items, setItems] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
-
+//test
   useEffect(() => {
     (async () => {
       setLoading(true);
