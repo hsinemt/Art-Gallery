@@ -1,84 +1,90 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import type { AuthUser, LoginPayload, RegisterPayload } from '../api/auth/auth';
-import { getCurrentUser, loginUser, logoutUser, registerUser, getStoredToken } from '../api/auth/auth';
-import axios from '../api/axios';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type AuthContextValue = {
-  user: AuthUser | null;
-  loading: boolean;
-  error: string | null;
-  login: (data: LoginPayload) => Promise<void>;
-  register: (data: RegisterPayload) => Promise<void>;
-  logout: () => Promise<void>;
-  setError: (msg: string | null) => void;
-  refreshUser: () => Promise<void>;
+type AuthUser = {
+  id?: number | string;
+  username: string;
+  email?: string;
 };
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+type LoginPayload = {
+  username: string;
+  password: string;
+};
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+type AuthContextType = {
+  user: AuthUser | null;
+  loading: boolean;
+  login: (data: LoginPayload) => Promise<void>;
+  logout: () => Promise<void>;
+  isAuthenticated: boolean;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  // Check if user is logged in on mount
   useEffect(() => {
-    // On mount, try to get current user (if token/cookie exists)
-    (async () => {
-      try {
-        const u = await getCurrentUser();
-        setUser(u);
-      } finally {
-        setLoading(false);
+    const checkAuth = () => {
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const username = localStorage.getItem('username');
+      
+      if (isLoggedIn && username) {
+        setUser({
+          username,
+          email: `${username}@example.com`,
+          id: 1
+        });
       }
-    })();
+      setLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
-  const refreshUser = async () => {
-    const u = await getCurrentUser();
-    setUser(u);
-  };
+  const login = async (data: LoginPayload): Promise<void> => {
+    // Static authentication
+    const STATIC_USERNAME = 'admin';
+    const STATIC_PASSWORD = 'admin123';
 
-  const login = async (data: LoginPayload) => {
-    setError(null);
-    const res = await loginUser(data);
-    // Some backends return user in response, else fetch it
-    const u = (res as any).user ?? (await getCurrentUser());
-    setUser(u ?? null);
-    // ensure axios instance uses the fresh token immediately
-    const token = getStoredToken();
-    if (token) {
-      axios.defaults.headers = axios.defaults.headers || {};
-      axios.defaults.headers['Authorization'] = `Token ${token}`;
+    if (data.username === STATIC_USERNAME && data.password === STATIC_PASSWORD) {
+      const newUser = {
+        username: data.username,
+        email: `${data.username}@example.com`,
+        id: 1
+      };
+      
+      setUser(newUser);
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('username', data.username);
+    } else {
+      throw new Error('Invalid credentials');
     }
   };
 
-  const register = async (data: RegisterPayload) => {
-    setError(null);
-    const res = await registerUser(data);
-    const u = (res as any).user ?? (await getCurrentUser());
-    setUser(u ?? null);
-    const token = getStoredToken();
-    if (token) {
-      axios.defaults.headers = axios.defaults.headers || {};
-      axios.defaults.headers['Authorization'] = `Token ${token}`;
-    }
-  };
-
-  const logout = async () => {
-    await logoutUser();
+  const logout = async (): Promise<void> => {
     setUser(null);
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
   };
 
-  const value = useMemo<AuthContextValue>(
-    () => ({ user, loading, error, login, register, logout, setError, refreshUser }),
-    [user, loading, error]
-  );
+  const value: AuthContextType = {
+    user,
+    loading,
+    login,
+    logout,
+    isAuthenticated: !!user
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = (): AuthContextValue => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
-  return ctx;
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
