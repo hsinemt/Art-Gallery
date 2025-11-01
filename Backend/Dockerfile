@@ -37,5 +37,5 @@ RUN python manage.py collectstatic --no-input
 ENV PORT 8000
 EXPOSE 8000
 
-# Set the start command (which handles migration first)
+# Set the  start command (which handles migration first)
 CMD python manage.py migrate --no-input && gunicorn artGallery.wsgi:application --bind 0.0.0.0:$PORT
