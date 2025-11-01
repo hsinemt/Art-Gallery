@@ -18,6 +18,7 @@ gunicorn==21.2.0
 whitenoise==6.7.0
 black==24.3.0
 flake8==7.1.0
+drf-yasg==1.21.7
 
 # -----------------------------------
 # AI / Machine Learning / NLP
