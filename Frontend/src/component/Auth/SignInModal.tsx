@@ -1,13 +1,17 @@
 import { type FormEvent, useState } from 'react';
 import './auth.css';
-import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const SignInModal = () => {
-  const { login } = useAuth();
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Static credentials
+  const STATIC_USERNAME = 'admin';
+  const STATIC_PASSWORD = 'admin123';
 
   const closeModal = () => {
     // @ts-ignore
@@ -19,34 +23,30 @@ const SignInModal = () => {
     }
   };
 
-  const extractError = (err: any): string => {
-    const data = err?.response?.data;
-    return (
-      data?.detail ||
-      data?.error ||
-      (Array.isArray(data?.non_field_errors) && data.non_field_errors[0]) ||
-      data?.username ||
-      data?.password ||
-      err?.message ||
-      'Login failed'
-    );
-  };
-
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    try {
-      setLoading(true);
-      await login({ username, password });
-      setUsername('');
-      setPassword('');
-      closeModal();
-    } catch (err: any) {
-      const msg = extractError(err);
-      setError(typeof msg === 'string' ? msg : 'Login failed');
-    } finally {
+    setLoading(true);
+
+    // Simulate a short delay for better UX
+    setTimeout(() => {
+      // Check static credentials
+      if (username === STATIC_USERNAME && password === STATIC_PASSWORD) {
+        // Success - store login state
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', username);
+        
+        setUsername('');
+        setPassword('');
+        closeModal();
+        
+        // Navigate to home
+        navigate('/');
+      } else {
+        setError('Invalid username or password');
+      }
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (
@@ -69,6 +69,14 @@ const SignInModal = () => {
 
           <div className="modal-body">
             {error && <div className="alert alert-danger" role="alert">{error}</div>}
+            
+            {/* Demo credentials info */}
+            <div className="alert alert-info" role="alert">
+              <strong>Demo Credentials:</strong><br />
+              Username: <code>admin</code><br />
+              Password: <code>admin123</code>
+            </div>
+
             <form onSubmit={onSubmit}>
               <div className="form-group">
                 <label htmlFor="signin-username">Username</label>
