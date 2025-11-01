@@ -55,9 +55,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
-    # When a user has a registered face_encoding, the client should submit
-    # a `face_image` during login for face verification.
-    face_image = serializers.ImageField(required=False, write_only=True)
 
     def validate(self, data):
         username = data.get('username')
@@ -69,32 +66,6 @@ class UserLoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Invalid credentials.')
             if not user.is_active:
                 raise serializers.ValidationError('User account is disabled.')
-            # If user has registered a face (encoding or saved face_image), require a face image and verify it here.
-            face_image = None
-            if self.context.get('request'):
-                face_image = self.context['request'].FILES.get('face_image')
-            if getattr(user, 'face_encoding', None) or getattr(user, 'face_image', None):
-                if not face_image:
-                    raise serializers.ValidationError('Face image required for this account.')
-                try:
-                    from . import face_utils
-                except Exception:
-                    raise serializers.ValidationError('Server face verification not available. Please contact admin.')
-
-                # Choose verification method: prefer stored encoding, else use stored image file
-                stored = getattr(user, 'face_encoding', None)
-                if not stored:
-                    # pass stored image path or file-like object
-                    stored = getattr(user, 'face_image')
-
-                try:
-                    verified = face_utils.verify_face_against_encoding(stored, face_image)
-                except Exception as e:
-                    raise serializers.ValidationError({'face_verification': str(e)})
-
-                if not verified:
-                    raise serializers.ValidationError('Face verification failed.')
-
             data['user'] = user
         else:
             raise serializers.ValidationError('Must include "username" and "password".')
@@ -103,12 +74,15 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    is_superuser = serializers.BooleanField(read_only=True)
+    is_staff = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name',
                   'user_type', 'bio', 'profile_picture', 'phone_number',
-                  'date_of_birth', 'date_joined')
-        read_only_fields = ('id', 'date_joined')
+                  'date_of_birth', 'date_joined', 'is_superuser', 'is_staff')
+        read_only_fields = ('id', 'date_joined', 'is_superuser', 'is_staff')
 
 
 class ChangePasswordSerializer(serializers.Serializer):

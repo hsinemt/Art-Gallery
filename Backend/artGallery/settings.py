@@ -1,7 +1,5 @@
 from pathlib import Path
 from decouple import config
-
-import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,9 +32,8 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.rapport',
     'apps.reclamation',
-
+    'apps.publication',
 ]
-
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
 
@@ -103,16 +100,28 @@ WSGI_APPLICATION = 'artGallery.wsgi.application'
 # }
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': config('DB_ENGINE'),
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
+DB_ENGINE = config('DB_ENGINE', default='django.db.backends.sqlite3')
+
+if 'sqlite3' in DB_ENGINE:
+    # Simple sqlite config for local development
+    DATABASES = {
+        'default': {
+            'ENGINE': DB_ENGINE,
+            'NAME': BASE_DIR / config('DB_NAME', default='db.sqlite3'),
+        }
     }
-}
+else:
+    # Production / external DB (Postgres, etc.)
+    DATABASES = {
+        'default': {
+            'ENGINE': DB_ENGINE,
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432'),
+        }
+    }
 
 
 # Password validation
