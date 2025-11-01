@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 type AuthUser = {
   id?: number | string;
@@ -11,10 +11,21 @@ type LoginPayload = {
   password: string;
 };
 
+type RegisterPayload = {
+  username: string;
+  email: string;
+  password: string;
+  password2: string;
+  first_name: string;
+  last_name: string;
+  user_type?: 'user' | 'artist';
+};
+
 type AuthContextType = {
   user: AuthUser | null;
   loading: boolean;
   login: (data: LoginPayload) => Promise<void>;
+  register: (data: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
 };
@@ -64,6 +75,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const register = async (data: RegisterPayload): Promise<void> => {
+    // Static registration - just accept any registration
+    if (data.password !== data.password2) {
+      throw new Error('Passwords do not match');
+    }
+
+    if (data.password.length < 6) {
+      throw new Error('Password must be at least 6 characters');
+    }
+
+    const newUser = {
+      username: data.username,
+      email: data.email,
+      id: Date.now() // Use timestamp as ID
+    };
+    
+    setUser(newUser);
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('username', data.username);
+  };
+
   const logout = async (): Promise<void> => {
     setUser(null);
     localStorage.removeItem('isLoggedIn');
@@ -74,6 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     loading,
     login,
+    register,
     logout,
     isAuthenticated: !!user
   };
