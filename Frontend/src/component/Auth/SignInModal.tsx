@@ -77,12 +77,12 @@ const SignInModal = () => {
           <div className="modal-body">
             {error && <div className="alert alert-danger" role="alert">{error}</div>}
             
-            {/* Demo credentials info */}
+            /* {/* Demo credentials info */}
             <div className="alert alert-info" role="alert" style={{ fontSize: '0.9rem' }}>
               <strong>Demo Credentials:</strong><br />
               Username: <code>admin</code><br />
               Password: <code>admin123</code>
-            </div>
+            </div> */
 
             <form onSubmit={onSubmit}>
               <div className="form-group">
