@@ -10,8 +10,8 @@ const SignInModal = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Static credentials
-  const STATIC_USERNAME = 'admin';
-  const STATIC_PASSWORD = 'admin123';
+  const STATIC_USERNAME = 'hsinemt';
+  const STATIC_PASSWORD = 'hsine123';
 
   const closeModal = () => {
     // @ts-ignore
