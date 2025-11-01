@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import './auth.css';
 import { useAuth } from '../../context/AuthContext';
 
