@@ -1,69 +1,90 @@
 import { type FormEvent, useState } from 'react';
 import './auth.css';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterModal = () => {
   const { register } = useAuth();
-  const [username, setUsername] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [userType, setUserType] = useState<'user' | 'artist'>('user');
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    password2: '',
+    first_name: '',
+    last_name: '',
+    user_type: 'user' as 'user' | 'artist'
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const closeModal = () => {
-    // Close modal if Bootstrap/jQuery present
     // @ts-ignore
     if (window && (window as any).$) {
       const $ = (window as any).$;
       if ($) {
         $('#registerModal').modal('hide');
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
       }
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   const extractError = (err: any): string => {
+    if (err?.message) return err.message;
     const data = err?.response?.data;
-    if (!data) return err?.message || 'Registration failed';
-    if (typeof data === 'string') return data;
-    // DRF field errors can be objects like {field: ["msg"]}
-    const fields = ['username','email','first_name','last_name','password','password2','user_type','non_field_errors','detail','error'];
-    for (const f of fields) {
-      const v = (data as any)[f];
-      if (Array.isArray(v) && v.length) return v[0];
-      if (typeof v === 'string') return v;
-    }
-    return 'Registration failed';
+    return (
+      data?.detail ||
+      data?.error ||
+      (Array.isArray(data?.non_field_errors) && data.non_field_errors[0]) ||
+      data?.username ||
+      data?.email ||
+      data?.password ||
+      'Registration failed'
+    );
   };
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password !== confirm) {
+
+    // Basic validation
+    if (formData.password !== formData.password2) {
       setError('Passwords do not match');
       return;
     }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
     try {
       setLoading(true);
-      await register({
-        username,
-        email,
-        password,
-        password2: confirm,
-        first_name: firstName,
-        last_name: lastName,
-        user_type: userType,
+      await register(formData);
+      setFormData({
+        username: '',
+        email: '',
+        password: '',
+        password2: '',
+        first_name: '',
+        last_name: '',
+        user_type: 'user'
       });
-      setUsername('');
-      setFirstName('');
-      setLastName('');
-      setEmail('');
-      setPassword('');
-      setConfirm('');
       closeModal();
+      
+      // Navigate to home after successful registration
+      setTimeout(() => {
+        navigate('/');
+        window.location.reload();
+      }, 300);
     } catch (err: any) {
       const msg = extractError(err);
       setError(typeof msg === 'string' ? msg : 'Registration failed');
@@ -92,94 +113,115 @@ const RegisterModal = () => {
 
           <div className="modal-body">
             {error && <div className="alert alert-danger" role="alert">{error}</div>}
+            
             <form onSubmit={onSubmit}>
               <div className="form-group">
-                <label htmlFor="reg-username">Username</label>
+                <label htmlFor="register-username">Username</label>
                 <input
                   type="text"
                   className="form-control"
-                  id="reg-username"
+                  id="register-username"
+                  name="username"
                   placeholder="Choose a username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={formData.username}
+                  onChange={handleChange}
+                  autoComplete="username"
                   required
                 />
               </div>
+
               <div className="form-group">
-                <label htmlFor="reg-first-name">First name</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="reg-first-name"
-                  placeholder="Your first name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="reg-last-name">Last name</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="reg-last-name"
-                  placeholder="Your last name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="reg-email">Email</label>
+                <label htmlFor="register-email">Email</label>
                 <input
                   type="email"
                   className="form-control"
-                  id="reg-email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="register-email"
+                  name="email"
+                  placeholder="your@email.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  autoComplete="email"
                   required
                 />
               </div>
+
+              <div className="form-row">
+                <div className="form-group col-md-6">
+                  <label htmlFor="register-firstname">First Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="register-firstname"
+                    name="first_name"
+                    placeholder="John"
+                    value={formData.first_name}
+                    onChange={handleChange}
+                    autoComplete="given-name"
+                    required
+                  />
+                </div>
+                <div className="form-group col-md-6">
+                  <label htmlFor="register-lastname">Last Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="register-lastname"
+                    name="last_name"
+                    placeholder="Doe"
+                    value={formData.last_name}
+                    onChange={handleChange}
+                    autoComplete="family-name"
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="form-group">
-                <label htmlFor="reg-user-type">I am</label>
-                <select
-                  id="reg-user-type"
+                <label htmlFor="register-password">Password</label>
+                <input
+                  type="password"
                   className="form-control"
-                  value={userType}
-                  onChange={(e) => setUserType(e.target.value as 'user' | 'artist')}
+                  id="register-password"
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  autoComplete="new-password"
                   required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="register-password2">Confirm Password</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="register-password2"
+                  name="password2"
+                  placeholder="••••••••"
+                  value={formData.password2}
+                  onChange={handleChange}
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="register-usertype">Account Type</label>
+                <select
+                  className="form-control"
+                  id="register-usertype"
+                  name="user_type"
+                  value={formData.user_type}
+                  onChange={handleChange}
                 >
-                  <option value="user">User</option>
+                  <option value="user">Art Lover</option>
                   <option value="artist">Artist</option>
                 </select>
               </div>
-              <div className="form-group">
-                <label htmlFor="reg-password">Password</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="reg-password"
-                  placeholder="Create a password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="reg-password2">Confirm Password</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="reg-password2"
-                  placeholder="Repeat password"
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  required
-                />
-              </div>
+
               <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Account'}
+                {loading ? 'Creating Account...' : 'Create Account'}
               </button>
             </form>
           </div>
@@ -193,7 +235,7 @@ const RegisterModal = () => {
               data-dismiss="modal"
               className="btn btn-link"
             >
-              Sign in
+              Sign In
             </a>
           </div>
         </div>
